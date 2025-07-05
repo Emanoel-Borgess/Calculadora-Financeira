@@ -6,13 +6,13 @@ def conversao(n, tipo_taxa, tipo_tempo):
         return n
     else:
         if tipo_taxa == "ano":
-            if tipo_tempo == "mês":
+            if tipo_tempo == "mes":
                  n_convertido = n / 12
                  return n_convertido
             elif tipo_tempo == "dia":
                 n_convertido = n / 360
                 return n_convertido
-        elif tipo_taxa == "mês":
+        elif tipo_taxa == "mes":
             if tipo_tempo == "ano":
                 n_convertido = n * 12
                 return n_convertido
@@ -23,7 +23,7 @@ def conversao(n, tipo_taxa, tipo_tempo):
             if tipo_tempo == "ano":
                 n_convertido = n * 360
                 return n_convertido
-            elif tipo_tempo == "mês":
+            elif tipo_tempo == "mes":
                 n_convertido = n * 30
                 return n_convertido
         return None #None significa um retorno sem valor
@@ -71,39 +71,37 @@ def main():
         opcao = int(input("\nDigite a opcao (0 a 7): "))
 
         if opcao == 1:
-            print("Vamos calcular o valor presente (Capital)!")
-            vf = float(input("Digite o valor final R$ "))
-            juros = float(input("Digite o valor do juros R$ "))
-            i = float(input("Digite a taxa: ")) / 100
-            tipo_taxa = str(input("Digite o tipo da taxa (dia/mês/ano): ")).lower()# O Lower converte todas as letras de uma string em minúscula.
+            print("Vamos calcular os Juros!")
+            vp = float(input("Digite o valor presente (VP) R$: "))
+            i = float(input("Digite a taxa (%): ")) / 100
+            tipo_taxa = input("Digite o tipo da taxa (dia/mês/ano): ").lower()
             n = float(input("Digite o tempo: "))
-            tipo_tempo = str(input("Digite o tipo do tempo (dia/mês/ano): ")).lower()
+            tipo_tempo = input("Digite o tipo do tempo (dia/mês/ano): ").lower()# O Lower converte todas as letras de uma string em minúscula.
             n_convertido = conversao(n, tipo_taxa, tipo_tempo)
-            capital = valorPresente(vf, i, n_convertido)
-            print(f"O valor do Capital é: R$",round(capital,2))#round é usado para arredondar as casas decimais.Também podemos fazer sem usar o round, um exemplo abaixo.
+            j = jurosSimples(vp, i, n_convertido)
+            print(f"O valor dos Juros é: R$ {round(j, 2)}")#round é usado para arredondar as casas decimais.Também podemos fazer sem usar o round, um exemplo abaixo.
 
         elif opcao == 2:
-            print("Vamos calcular o valor futuro (Montante)!")
-            vf = float(input("Digite o valor final R$ "))
-            juros = float(input("Digite o valor do juros R$ "))
-            i = float(input("Digite a taxa: ")) / 100
-            tipo_taxa = str(input("Digite o tipo da taxa (dia/mês/ano): ")).lower()
+            print("Vamos calcular o Valor Presente (Capital)!")
+            vf = float(input("Digite o valor futuro (VF) R$: "))
+            i = float(input("Digite a taxa (%): ")) / 100
+            tipo_taxa = input("Digite o tipo da taxa (dia/mês/ano): ").lower()
             n = float(input("Digite o tempo: "))
-            tipo_tempo = str(input("Digite o tipo do tempo (dia/mês/ano): ")).lower()
+            tipo_tempo = input("Digite o tipo do tempo (dia/mês/ano): ").lower()
             n_convertido = conversao(n, tipo_taxa, tipo_tempo)
-            montante = valorFuturo(vp, i, n_convertido)
-            print(f"O valor do Montante é: R$",round(montante,2))
+            vp = valorPresente(vf, i, n_convertido)
+            print(f"O valor do Capital (VP) é: R$ {round(vp, 2)}")
 
         elif opcao == 3:
-            print("Vamos calcular o juros simples!")
-            vp = float(input("Digite o valor presente R$ "))
-            i = float(input("Digite a taxa: ")) / 100
-            tipo_taxa = str(input("Digite o tipo da taxa (dia/mês/ano): ")).lower()
+            print("Vamos calcular o Valor Futuro (Montante)!")
+            vp = float(input("Digite o valor presente (VP) R$: "))
+            i = float(input("Digite a taxa (%): ")) / 100
+            tipo_taxa = input("Digite o tipo da taxa (dia/mês/ano): ").lower()
             n = float(input("Digite o tempo: "))
-            tipo_tempo = str(input("Digite o tipo do tempo (dia/mês/ano): ")).lower()
+            tipo_tempo = input("Digite o tipo do tempo (dia/mês/ano): ").lower()
             n_convertido = conversao(n, tipo_taxa, tipo_tempo)
-            juros_simples = jurosSimples(vp, i, n_convertido)
-            print(f"O valor do juros simples é: R$",round(juros_simples,2))
+            vf = valorFuturo(vp, i, n_convertido)
+            print(f"O valor do Montante (VF) é: R$ {round(vf, 2)}")
 
         elif opcao == 4:
             print("Vamos calcular a Taxa!")
@@ -111,23 +109,25 @@ def main():
             n = float(input("Digite o tempo: "))
             vf = float(input("Digite o valor futuro R$ "))
             i = taxa(vp, n, vf) * 100
-            print(f"O valor da taxa é: R$",i,"%")
+            print(f"O valor da taxa é: {round(i,2)} %")
 
         elif opcao == 5:
-            print("Vamos calcular a Tempo!")
+            print("Vamos calcular a Tempo (n)!")
             vp = float(input("Digite o valor presente R$ "))
-            i = float(input("Digite a taxa em (%): "))
+            i = float(input("Digite a taxa em (%): ")) / 100
             vf = float(input("Digite o valor futuro R$ "))
-            n = tempo(vp, i, vf) / 100
-            print(f"O valor da taxa é: R$",n)
+            n = tempo(vf, vp, i)
+            print(f"O tempo necessário é:",n,"períodos")
 
         elif opcao == 6:
+            print("Vamos calcular a taxa de desconto comercial!")
             vf = float(input("Digite o valor futuro R$ "))
             d = float(input("Digite o valor do desconto comercial R$ "))
-            n = float(input("Digite o tempo:"))
+            n = float(input("Digite o tempo: "))
             print("Taxa de desconto comercial é:",descontoComercial(vf, d, n) * 100, "%")
 
         elif opcao == 7:
+            print("Vamos calcular a taxa efetiva!")
             vp = float(input("Digite o valor presente R$ "))
             d = float(input("Digite o valor do desconto R$ "))
             n = float(input("Digite o tempo: "))
