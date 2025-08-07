@@ -72,6 +72,16 @@ def taxaComposta(vp, vf, n):
 def tempoComposto(vf, vp, i):
     return math.log(vf / vp) / math.log(1 + i)
 
+def nominal_para_efetiva(ik, k):
+    return ik / k
+
+def efetiva_para_nominal(i, k):
+    return i * k
+
+def taxa_equivalente(i_origem, n_origem, n_destino):
+    return (1 + i_origem) ** (n_origem / n_destino) - 1
+
+
 def main():
     
     while True:
@@ -91,9 +101,12 @@ def main():
         print("10 - Calcular Montante Composto (VF)")
         print("11 - Calcular Taxa Composta (i)")
         print("12 - Calculando Tempo Composto (n)")
+        print("13 - Converter taxa nominal para efetiva")
+        print("14 - Converter taxa efetiva para nominal")
+        print("15 - Converter taxas efetivas equivalentes entre períodos")
         print("0 - Sair")
 
-        opcao = int(input("\nDigite a opcao (0 a 12): "))
+        opcao = int(input("\nDigite a opcao (0 a 15): "))
 
         if opcao == 1:
             print("Vamos calcular os Juros!")
@@ -164,7 +177,7 @@ def main():
 
         elif opcao == 6:
             print("Vamos calcular a Taxa de Desconto Comercial!")
-            i = float(input("Digite a taxa: "))
+            i = float(input("Digite a taxa: ")) / 100
             n = float(input("Digite o tempo: "))
             tipo_taxa = input("Digite o tipo da taxa (dia/mês/ano): ").lower().replace("mes", "mês")
             tipo_tempo = input("Digite o tipo do tempo (dia/mês/ano): ").lower().replace("mes", "mês")
@@ -177,7 +190,7 @@ def main():
 
         elif opcao == 7:
             print("Vamos calcular a Taxa de Juros Efetiva!")
-            ic = float(input("Digite a taxa de desconto "))
+            ic = float(input("Digite a taxa de desconto ")) / 100
             n = float(input("Digite o tempo: "))
             tipo_taxa = input("Digite o tipo da taxa (dia/mês/ano): ").lower().replace("mes", "mês")
             tipo_tempo = input("Digite o tipo do tempo (dia/mês/ano): ").lower().replace("mes", "mês")
@@ -253,6 +266,28 @@ def main():
             tipo_tempo = input("Digite o tipo do tempo (dia/mês/ano): ").lower().replace("mes", "mês")
             n = tempoComposto(vf, vp, i)
             print(f"O tempo necessário é: {round(n, 2)} períodos na unidade da taxa ({tipo_taxa})")
+
+        elif opcao == 13:
+            print("Conversão da taxa nominal para efetiva")
+            ik = float(input("Digite a taxa nominal (%): ")) / 100
+            k = int(input("Digite o número de períodos por ano: "))
+            i = nominal_para_efetiva(ik, k) * 100
+            print(f"A taxa efetiva proporcional é: {round(i, 2)}%")
+
+        elif opcao == 14:
+            print("Conversão da taxa efetiva para nominal")
+            i = float(input("Digite a taxa efetiva proporcional (%): ")) / 100
+            k = int(input("Digite o número de períodos por ano: "))
+            ik = efetiva_para_nominal(i, k) * 100
+            print(f"A taxa nominal é: {round(ik, 2)}%")
+
+        elif opcao == 15:
+            print("Conversão entre taxas efetivas equivalentes")
+            i = float(input("Digite a taxa efetiva conhecida (%): ")) / 100
+            n_origem = float(input("Número de períodos da taxa conhecida (ex: 12 para mensal): "))
+            n_destino = float(input("Número de períodos desejado (ex: 1 para anual): "))
+            i_eq = taxa_equivalente(i, n_origem, n_destino) * 100
+            print(f"A taxa efetiva equivalente é: {round(i_eq, 2)}%")
 
         elif opcao == 0:
             print("Saindo...")
