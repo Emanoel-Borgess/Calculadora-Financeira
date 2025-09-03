@@ -31,6 +31,25 @@ def conversao(n, tipo_taxa, tipo_tempo):
                 return n_convertido
         return None #None significa um retorno sem valor
     
+# ---- Formatação BR (ponto para milhar, vírgula para decimal) ----
+def format_brl(valor):
+    s = f"{valor:,.2f}"
+    return s.replace(",", "§").replace(".", ",").replace("§", ".")
+
+def print_tabela_amortizacao(tabela):
+    # Cabeçalho da tabela
+    print(f"{'Período':>7} {'Saldo Devedor':>18} {'Amortização':>16} {'Juros':>14} {'Prestação':>16}")
+    
+    # Imprime cada linha da tabela formatada
+    for linha in tabela:
+        print(
+            f"{linha['Período']:>7} "
+            f"{format_brl(linha['Saldo Devedor']):>18} "
+            f"{format_brl(linha['Amortização']):>16} "
+            f"{format_brl(linha['Juros']):>14} "
+            f"{format_brl(linha['Prestação']):>16}"
+        )
+    
 def valor_presente_simples(vf, i, n):
     vp = vf / (1 + (i * n))
     return vp
@@ -81,6 +100,73 @@ def efetiva_para_nominal(i, k):
 def taxa_equivalente(i_origem, n_origem, n_destino):
     return (1 + i_origem) ** (n_origem / n_destino) - 1
 
+# SAC
+def amortizacao_sac(vp, i, n):
+    saldo = vp
+    amortizacao = vp / n
+    tabela = []
+    for t in range(1, n + 1):
+        juros = saldo * i
+        prestacao = amortizacao + juros
+        saldo -= amortizacao
+        tabela.append({
+            "Período": t,
+            "Saldo Devedor": saldo,
+            "Amortização": amortizacao,
+            "Juros": juros,
+            "Prestação":prestacao
+        })
+    return tabela
+
+# SAF (Price)
+def amortizacao_saf(vp, i, n):
+    pmt = vp * (i / (1 - (1 + i) ** -n))
+    saldo = vp
+    tabela = []
+    for t in range(1, n + 1):
+        juros = saldo * i
+        amortizacao = pmt - juros
+        saldo -= amortizacao
+        tabela.append({
+            "Período": t,
+            "Saldo Devedor": saldo,
+            "Amortização": amortizacao,
+            "Juros": juros,
+            "Prestação": pmt
+        })
+    return tabela
+
+# SAA (Americano)
+def amortizacao_saa(vp, i, n):
+    saldo = vp
+    tabela = []
+    for t in range(1, n + 1):
+        if t < n:
+            juros = vp * i
+            prestacao = juros
+            amortizacao = 0
+        else:  # última parcela
+            juros = vp * i
+            amortizacao = vp
+            prestacao = juros + amortizacao
+            saldo = 0
+        tabela.append({
+            "Período": t,
+            "Saldo Devedor": saldo,
+            "Amortização": amortizacao,
+            "Juros": juros,
+            "Prestação": prestacao
+        })
+    return tabela
+
+def calcular_vpl(investimento, taxa, fluxos, valor_residual=0):
+    vpl = -investimento
+    for t, cf in enumerate(fluxos, start=1):
+        vpl += cf / ((1 + taxa) ** t)
+    if valor_residual != 0:
+        vpl += valor_residual / ((1 + taxa) ** len(fluxos))
+    return round(vpl, 2)
+
 
 def main():
     
@@ -108,6 +194,13 @@ def main():
         print("13 - Converter taxa nominal para efetiva")
         print("14 - Converter taxa efetiva para nominal")
         print("15 - Converter taxas efetivas equivalentes entre períodos")
+
+        print("\n=== Calculadora Financeira - Parte de amortização e VPL ===")
+        print("\n=== Amortização e VPL ===")
+        print("16 - Calcular Amortização SAC")
+        print("17 - Calcular Amortização SAF (Price)")
+        print("18 - Calcular Amortização SAA (Americano)")
+        print("19 - Calcular VPL (Valor Presente Líquido)")
         print("\n0 - Sair")
 
         opcao = int(input("\nDigite a opcao (0 a 15): "))
@@ -333,8 +426,46 @@ def main():
                 i_eq = taxa_equivalente(i, n_maior, n_menor) * 100
                 print(f"Taxa equivalente no período menor: {round(i_eq, 2)}%")
 
-            else:
-                print("Opção inválida. Escolha 1 ou 2.")
+        elif opcao == 16:
+            print("\n=== Amortização SAC ===")
+            vp = float(input("Digite o valor do financiamento (VP): "))
+            i = float(input("Digite a taxa (%): ")) / 100
+            n = int(input("Digite o tempo (n): "))
+            tabela = amortizacao_sac(vp, i, n)
+            print_tabela_amortizacao(tabela)
+
+
+        elif opcao == 17:
+            print("\n=== Amortização SAF (Price) ===")
+            vp = float(input("Digite o valor do financiamento (VP): "))
+            i = float(input("Digite a taxa (%): ")) / 100
+            n = int(input("Digite o tempo (n): "))
+            tabela = amortizacao_saf(vp, i, n)
+            print_tabela_amortizacao(tabela)
+
+        elif opcao == 18:
+            print("\n=== Amortização SAA (Americano) ===")
+            vp = float(input("Digite o valor do financiamento (VP): "))
+            i = float(input("Digite a taxa (%): ")) / 100
+            n = int(input("Digite o tempo (n): "))
+            tabela = amortizacao_saa(vp, i, n)
+            print_tabela_amortizacao(tabela)
+
+        elif opcao == 19:
+            print("\n=== Valor Presente Líquido (VPL) ===")
+            investimento = float(input("Digite o investimento inicial: "))
+            taxa = float(input("Digite a taxa (%): ")) / 100
+            n = int(input("Digite o tempo (n): "))
+
+            fluxos = []
+            for t in range(1, n + 1):
+                cf = float(input(f"Digite o fluxo de caixa no período {t}: "))
+                fluxos.append(cf)
+
+            valor_residual = float(input("Digite o valor residual (ou 0 se não houver): "))
+
+            vpl = calcular_vpl(investimento, taxa, fluxos, valor_residual)
+            print(f"\nO Valor Presente Líquido (VPL) é: R$ {format_brl(vpl)}")
 
         elif opcao == 0:
             print("Saindo...")
