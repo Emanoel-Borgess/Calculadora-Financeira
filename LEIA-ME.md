@@ -1,0 +1,1 @@
+Este projeto foi finalizado no dia 18 de Setembro de 2025.
